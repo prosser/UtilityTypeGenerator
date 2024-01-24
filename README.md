@@ -4,7 +4,9 @@ Generates TypeScript-like utility types for C#.
 
 Utility types are generated types based on one or more input types. Slap the `[UtilityType(arg)]` attribute on a
 `partial` type and the generator will generate a partial type with the same name and type (e.g., class, record, struct)
-as the input type, but with the specified utility type applied.
+as the type with the attribute (yes, that can be different from the input type(s)!), but with the specified selector(s) applied.
+
+For more information about utility types and how to use them, check out [the docs](https://www.typescriptlang.org/docs/handbook/utility-types.html).
 
 Utility types can be composed to create new utility types, e.g. `Required<Union<T1, T2>>`.
 
@@ -16,9 +18,9 @@ Utility types can be composed to create new utility types, e.g. `Required<Union<
 1. Add the **UtilityTypeGenerator** NuGet package to your project (pick your flavor):
     - .csproj: `<PackageReference Include="UtilityTypeGenerator" Version="0.0.2" />`
     - dotnet CLI: `dotnet add package UtilityTypeGenerator`
-1. Add the `[UtilityType(arg)]` attribute to a `partial` type.
+1. Add the `[UtilityType("selector")]` attribute to a `partial` type, replacing `"selector"` with the selector(s) of your choice.
 
-## Supported utility types
+## Supported selectors
 
 - `Pick<T, Property1 | Property2 | ...>`
 - `Omit<T, Property1 | Property2 | ...>`

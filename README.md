@@ -15,9 +15,9 @@ For more information about utility types and how to use them, check out [the Typ
 
 ## Usage
 
-1. Add the **UtilityTypeGenerator** NuGet package to your project (pick your flavor):
-    - .csproj: `<PackageReference Include="UtilityTypeGenerator" Version="0.0.2" />`
-    - dotnet CLI: `dotnet add package UtilityTypeGenerator`
+1. Add the **UtilityTypeGenerator** NuGet package to your project:
+    - `<PackageReference Include="UtilityTypeGenerator" Version="0.0.4" PrivateAssets="all" IncludeAssets="build; analyzers" />
+`
 1. Add the `[UtilityType("selector")]` attribute to a `partial` type, replacing `"selector"` with the selector(s) of your choice.
 
 ## Supported selectors

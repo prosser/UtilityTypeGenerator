@@ -17,8 +17,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconPath>$(MSBuildThisFileDirectory)../../icon.png</PackageIconPath>
-    <Version>0.0.2</Version>
-    <PackageVersion>0.0.2</PackageVersion>
+    <Version>0.0.3</Version>
+    <PackageVersion>0.0.3</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/prosser/UtilityTypeGenerator</PackageProjectUrl>

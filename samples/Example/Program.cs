@@ -8,7 +8,7 @@ public class Person
 {
     public Guid Id { get; set; }
     public string? Name { get; set; }
-    public DateTime? BirthDate { get; set; }
+    public DateTimeOffset? BirthDate { get; set; }
 }
 
 public class Position
@@ -18,10 +18,10 @@ public class Position
     public string JobTitle { get; set; } = "";
 }
 
-[UtilityType("Import<Position>")]
-public partial class Foo
+[UtilityType("Import<Person>")]
+public partial class PersonWithMessage
 {
-    public string FooBar { get; set; } = "";
+    public string Message { get; set; } = "";
 }
 
 [UtilityType("Required<Person>")]
@@ -51,10 +51,21 @@ public partial class PersonAndPositionEverythingRequired;
 [UtilityType("Nullable<Position>")]
 public partial class PositionEverythingNullable;
 
+[UtilityType("Nullable<Union<Person, Position>>")]
+public partial record ChangeToARecordType;
+
 public class Program
 {
     public static void Main()
     {
+        PersonWithMessage foo = new()
+        {
+            Message = "Hello, World!",
+            Id = Guid.Empty,
+            Name = "Peter Rosser",
+            BirthDate = new DateTimeOffset(1975, 11, 7, 15, 32, 0, TimeSpan.FromHours(-9)),
+        };
+
         foreach (Type type in typeof(Program).Assembly.GetTypes().OrderBy(x => x.Name))
         {
             Console.WriteLine($"{type.Name} has these properties:");

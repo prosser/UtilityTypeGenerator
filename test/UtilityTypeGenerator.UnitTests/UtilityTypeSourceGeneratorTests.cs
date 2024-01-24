@@ -6,18 +6,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit.Abstractions;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-[UtilityType("""
-{
-    "pick":{
-        "type": "UtilityTypeGenerator.UnitTests.TestPoco",
-        "properties":[
-            "NotNullString"
-        ]
-    }
-}
-""")]
-public partial class Unioned;
-
 public class UtilityTypeSyntaxReceiverTests(ITestOutputHelper output)
 {
     public static TheoryData<string, SyntaxNode, TypeDeclarationSyntax?, SyntaxKind, AttributeSyntax?> GetTestData()
@@ -71,10 +59,10 @@ public class UtilityTypeSyntaxReceiverTests(ITestOutputHelper output)
 
         // assert
         receiver.Received.Should().ContainSingle();
-        (TypeDeclarationSyntax typeToAugment, SyntaxKind syntaxKind, AttributeSyntax? utilityTypeAttribute) = receiver.Received[0];
+        (TypeDeclarationSyntax typeToAugment, AttributeSyntax? utilityTypeAttribute) = receiver.Received[0];
         output.WriteLine(testName);
         typeToAugment.Should().Be(expectedTypeToAugment);
-        syntaxKind.Should().Be(expectedSyntaxKind);
+        typeToAugment.Kind().Should().Be(expectedSyntaxKind);
 
         if (expectedUtilityTypeAttribute is null)
         {

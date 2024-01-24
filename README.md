@@ -18,18 +18,6 @@ Utility types can be composed to create new utility types, e.g. `Required<Union<
     - dotnet CLI: `dotnet add package UtilityTypeGenerator`
 1. Add the `[UtilityType(arg)]` attribute to a `partial` type.
 
-### A note on error handling
-
-Don't expect much. Garbage in, garbage out, and all that. That said, the code generator prefers to 
-emit nothing if you have a syntax error. If you're not getting the type generated, here are the most
-likely causes:
-
-- Misspellings and typos (that hardly needs to be said, right?)
-- Property name in `Pick` or `Omit` that doesn't actually exist in the type.
-- make sure your `<>` chars are balanced!
-- `|` is the property name delimiter, not `,`. (for `Pick` and `Omit`)
-- `Union` and `Intersection` require at least 2 type arguments.
-
 ## Supported utility types
 
 - `Pick<T, Property1 | Property2 | ...>`
@@ -307,3 +295,22 @@ public partial class PersonAndUser
 }
 ```
 
+## A note on error handling and implementation choices
+
+Don't expect much. Garbage in, garbage out, and all that. That said, the code generator prefers to 
+emit nothing if you have a syntax error. If you're not getting the type generated, here are the most
+likely causes:
+
+- Misspellings and typos (that hardly needs to be said, right?)
+- Property name in `Pick` or `Omit` that doesn't actually exist in the type.
+- make sure your `<>` chars are balanced!
+- `|` is the property name delimiter, not `,`. (for `Pick` and `Omit`)
+- `Union` and `Intersection` require at least 2 type arguments.
+
+If this gets at all popular, I'll add some compiler warnings, syntax highlighting & error checking (red-squiggles!), etc.
+
+I chose to use a string argument instead of more C#-like syntax to allow for a more compact syntax that is identical in
+nearly every case to the TypeScript syntax. Under the covers, the generator uses ANTLR with a simple grammar to do the parsing,
+and extending it to support more selectors is fairly trivial.
+
+If there's demand for a more verbose syntax, I'll consider adding it (or you can submit a PR).

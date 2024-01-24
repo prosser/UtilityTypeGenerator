@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 /// Composition constructor.
 /// </remarks>
 /// <param name="selector">Selector or type symbol containing properties to make nullable.</param>
-public class ReadonlySelector(SelectorOrSymbol selector) : UtilityTypeSelector(selector)
+public class ReadonlySelector(SymbolOrSelector selector) : UtilityTypeSelector(selector)
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {

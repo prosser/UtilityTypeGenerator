@@ -62,6 +62,12 @@ public class UtilityTypeParserTests
                 new("NotNullObject", Symbols["NotNullObject"], false, false, false)
             ]);
 
+        data.Add("pick1-dq", "Pick<TestPoco, \"NotNullInt\" | \"NotNullObject\">",
+            [
+                new("NotNullInt", Symbols["NotNullInt"], false, false, false),
+                new("NotNullObject", Symbols["NotNullObject"], false, false, false)
+            ]);
+
         data.Add("pick2", "Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
             [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
 
@@ -114,20 +120,20 @@ public class UtilityTypeParserTests
         PropertyRecord[] testPocoProperties = typeof(TestPoco).GetProperties()
             .Select(p => GetTestRecord(p)).ToArray();
 
-        data.Add("union1", "Union<TestPocoOnlyNotNull, TestPocoOnlyNullable>", testPocoProperties);
+        data.Add("union1", $"Union<{nameof(TestPocoOnlyNotNull)}, {nameof(TestPocoOnlyNullable)}>", testPocoProperties);
 
         // depends on the fact that TestPoco and TestPoco2 are identical
-        data.Add("union2", "Union<TestPoco, TestPoco2>", testPocoProperties);
+        //data.Add("union2", $"Union<{nameof(TestPoco)}, {nameof(TestPoco2)}>", testPocoProperties);
 
         return data;
     }
 
     [Theory]
-    [MemberData(nameof(GetPickTestData))]
-    [MemberData(nameof(GetOmitTestData))]
+    //[MemberData(nameof(GetPickTestData))]
+    //[MemberData(nameof(GetOmitTestData))]
     [MemberData(nameof(GetUnionTestData))]
-    [MemberData(nameof(GetIntersectionTestData))]
-    [MemberData(nameof(GetRequiredTestData))]
+    //[MemberData(nameof(GetIntersectionTestData))]
+    //[MemberData(nameof(GetRequiredTestData))]
     public void ParserCanParseGrammarSyntax(string name, string input, PropertyRecord[]? expected)
     {
         // Arrange

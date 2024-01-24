@@ -1,4 +1,3 @@
-// DELETE THIS CONTENT IF YOU PUT COMBINED GRAMMAR IN Parser TAB
 lexer grammar UtilityTypesLexer;
 
 // keywords
@@ -27,7 +26,6 @@ fragment Semicolon: ';';
 
 ID: [a-zA-Z_][a-zA-Z_0-9]* ;
 WS: [ \t\n\r\f]+ -> skip ;
-//ID:  LetterCharacter (LetterCharacter | DecimalDigitCharacter)*;
 
 DOT: '.';
 LT : '<';
@@ -37,5 +35,3 @@ BITWISE_OR : '|';
 SEMICOLON : Semicolon;
 DQ: DoubleQuote;
 SQ: SingleQuote;
-
-//INT : [0-9]+ ;

@@ -2,16 +2,16 @@
 
 Generates TypeScript-like utility types for C#.
 
-Utility types are generated types based on one or more input types. Slap the `[UtilityType(arg)]` attribute on a
+Utility types are generated types based on one or more input types. Slap the `[UtilityType(selector)]` attribute on a
 `partial` type and the generator will generate a partial type with the same name and type (e.g., class, record, struct)
 as the type with the attribute (yes, that can be different from the input type(s)!), but with the specified selector(s) applied.
 
-For more information about utility types and how to use them, check out [the docs](https://www.typescriptlang.org/docs/handbook/utility-types.html).
-
-Utility types can be composed to create new utility types, e.g. `Required<Union<T1, T2>>`.
+For more information about utility types and how to use them, check out [the TypeScript docs](https://www.typescriptlang.org/docs/handbook/utility-types.html).
 
 > **Important Note:** This only generates auto-properties, no matter whether the input type's properties are auto-properties or not.
 > This can be handy in and of itself, but computed properties are out of scope for this project.
+
+> **Another important note:** This is a source generator, so it only works w/ .NET 5.0+. However, I'm opinionated about using the latest stable C# SDK, so YMMV if you are running something ancient (like C# 7.3). You should really be setting `<LangVersion>latest</LangVersion>` in your projects (yes, that works with older TargetFrameworks).
 
 ## Usage
 
@@ -22,24 +22,23 @@ Utility types can be composed to create new utility types, e.g. `Required<Union<
 
 ## Supported selectors
 
-- `Pick<T, Property1 | Property2 | ...>`
-- `Omit<T, Property1 | Property2 | ...>`
-- `Required<T>`
-- `Optional<T>`
-- `Nullable<T>`*
-- `Import<T>`
-- `Union<T1, T2, ...>`
-- `Intersection<T1, T2, ...>`
+A selector is a string that specifies a verb (e.g., `Pick`), one or more types or nested selectors, and (for some verbs) property names.
 
-> \* `Optional<T>` behaves differently than it does in TypeScript! [See below for details](#Optional).
+| Verb | Syntax | Description |
+| ---- | ------ | ----------- |
+| `Import` | `Import<T>` | Imports all of the properties from `T` (a type or selector). |
+| `Intersection` | `Intersection<T1, T2 [, T3] [...]>` or `Intersect<T1, T2 [, T3] [...]>` | Creates a type with the intersection of properties from `T1` and `T2`, etc. (types or selectors). Duplicate properties are okay, but the type of the property must be the same in both types. |
+| `NotNull` | `NotNull<T>` | Creates a type with all properties from `T` (a type or selector) transformed to non-nullable.|
+| `Nullable` | `Nullable<T>` | Creates a type with all properties from `T` (a type or selector) transformed to nullable.|
+| `Omit` | `Omit<T, Property1 [| Property2] [...]>` or `Omit<T, Property1 [, Property2] [...]>` | Creates a type with all properties from `T` (a type or selector) except the specified properties. |
+| `Optional`* | `Optional<T>` | Creates a type with all properties from `T` (a type or selector) stripped of the `required` keyword. <br>\* `Optional<T>` behaves differently than it does in TypeScript! [See below for details](#Optional). |
+| `Pick` | `Pick<T, Property1 [| Property2] [...]>` or `Pick<T, Property1 [, Property2] [...]>` | Creates a type with only the specified properties from `T` (a type or selector). |
+| `Required` | `Required<T>` | Creates a type with all properties from `T` (a type or selector) marked as `required`.<br>Requires C# 11+ (or PolySharp!) |
+| `Union` | `Union<T1, T2 [, T3] [...]>` | Creates a type with the union of properties from `T1` and `T2`, etc. (types or selectors). Duplicate properties are okay, but the type of the property must be the same in both types. At least 2 types must be present in the selector. |
+
+## Examples
 
 ### Import
-
-Imports all of the properties from `T` (a type or another utility type).
-
-Syntax: `Import<T>`
-
-#### Example
 
 ```csharp
 public class Person
@@ -70,14 +69,6 @@ public partial class Foo
 
 ### Pick
 
-Creates a type with only the specified properties from `T` (a type or another utility type).
-
-Property names are separated by `|` (pipe) characters, and must exist on the input type.
-
-Syntax: `Pick<T, Property1 | Property2 | ...>`
-
-#### Example
-
 ```csharp
 public class Person
 {
@@ -99,14 +90,6 @@ public partial class OnlyName
 ```
 
 ### Omit
-
-Creates a type with all properties from `T` (a type or another utility type) except the specified properties.
-
-Property names are separated by `|` (pipe) characters, and must exist on the input type.
-
-Syntax: `Omit<T, Property1 | Property2 | ...>`
-
-#### Example
 
 ```csharp
 public class Person
@@ -132,12 +115,6 @@ public partial class OmitName
 
 ### Required
 
-Creates a type with all properties from `T` (a type or another utility type) transformed to non-nullable.
-
-Syntax: `Required<T>`
-
-#### Example
-
 ```csharp
 public class Person
 {
@@ -162,15 +139,10 @@ public partial class PersonRequired
 
 ### Optional
 
-Creates a type with all properties from `T` (a type or another utility type) stripped of the `required` keyword.
-
 > IMPORTANT: This is different from TypeScript, where `Optional<T>` allows `undefined` values for the properties.
 
-> TIP: This should be combined with `Nullable<T>` to avoid NullReferenceExceptions for reference types.
-
-Syntax: `Required<T>`
-
-#### Example
+> TIP: This should be combined with `Nullable<T>` to avoid NullReferenceExceptions for any reference type properties.
+> Composition with `Pick<T>` and `Omit<T>` can also be helpful.
 
 ```csharp
 public class Person
@@ -196,12 +168,6 @@ public partial class PersonOptional
 
 ### Nullable
 
-Creates a type with all properties from `T` (a type or another utility type) transformed to nullable.
-
-Syntax: `Nullable<T>`
-
-#### Example
-
 ```csharp
 public class Person
 {
@@ -226,10 +192,9 @@ public partial class PersonWithNullableProperties
 
 ### Union
 
-Creates a type with the union of properties from `T1` and `T2`, etc. (types or other utility types). Duplicate properties are okay,
-but the type of the property must be the same in both types.
+> TIP: If you are trying to Union just one type, use `Import<T>` instead.
 
-Syntax: `Union<T1, T2, ...>`
+Syntax: `Union<T1, T2 [, T3] [...]>`
 
 #### Example
 
@@ -264,13 +229,6 @@ public partial class PersonAndUser
 
 ### Intersection
 
-Creates a type with the intersection of properties from `T1` and `T2`, etc. (types or other utility types). Duplicate properties are okay,
-but the type of the property must be the same in both types.
-
-Syntax: `Intersection<T1, T2, ...>`
-
-#### Example
-
 ```csharp
 public class Person
 {
@@ -297,19 +255,9 @@ public partial class PersonAndUser
 }
 ```
 
-## A note on error handling and implementation choices
+## A note on implementation choices
 
-Don't expect much. Garbage in, garbage out, and all that. That said, the code generator prefers to 
-emit nothing if you have a syntax error. If you're not getting the type generated, here are the most
-likely causes:
-
-- Misspellings and typos (that hardly needs to be said, right?)
-- Property name in `Pick` or `Omit` that doesn't actually exist in the type.
-- make sure your `<>` chars are balanced!
-- `|` is the property name delimiter, not `,`. (for `Pick` and `Omit`)
-- `Union` and `Intersection` require at least 2 type arguments.
-
-If this gets at all popular, I'll add some compiler warnings, syntax highlighting & error checking (red-squiggles!), etc.
+If this gets at all popular, I'll add more compiler messages, syntax highlighting & error checking (red-squiggles!), etc.
 
 I chose to use a string argument instead of more C#-like syntax to allow for a more compact syntax that is identical in
 nearly every case to the TypeScript syntax. Under the covers, the generator uses ANTLR with a simple grammar to do the parsing,

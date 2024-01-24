@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-public class UnionSelector(IEnumerable<SelectorOrSymbol> selectors) : UtilityTypeSelector(compiler =>
+public class UnionSelector(IEnumerable<SymbolOrSelector> selectors) : UtilityTypeSelector(compiler =>
     {
         PropertyRecordComparer comparer = new();
         return selectors.SelectMany(s => s.GetPropertyRecords(compiler))

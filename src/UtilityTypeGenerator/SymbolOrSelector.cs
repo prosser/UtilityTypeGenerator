@@ -3,21 +3,21 @@
 using System;
 using Microsoft.CodeAnalysis;
 
-public record SelectorOrSymbol
+public record SymbolOrSelector
 {
-    private SelectorOrSymbol(UtilityTypeSelector? selector, INamedTypeSymbol? symbol)
+    private SymbolOrSelector(INamedTypeSymbol? symbol, UtilityTypeSelector? selector)
     {
         Selector = selector;
         Symbol = symbol;
     }
 
-    public SelectorOrSymbol(UtilityTypeSelector? selector)
-        : this(selector, null)
+    public SymbolOrSelector(UtilityTypeSelector? selector)
+        : this(null, selector)
     {
     }
 
-    public SelectorOrSymbol(INamedTypeSymbol? symbol)
-        : this(null, symbol)
+    public SymbolOrSelector(INamedTypeSymbol? symbol)
+        : this(symbol, null)
     {
     }
 

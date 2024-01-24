@@ -3,7 +3,7 @@
 using System;
 using Microsoft.CodeAnalysis;
 
-public class IntersectionSelector(IEnumerable<SelectorOrSymbol> selectors) : UtilityTypeSelector(compiler =>
+public class IntersectionSelector(IEnumerable<SymbolOrSelector> selectors) : UtilityTypeSelector(compiler =>
     {
         PropertyRecordComparer comparer = new();
         return selectors

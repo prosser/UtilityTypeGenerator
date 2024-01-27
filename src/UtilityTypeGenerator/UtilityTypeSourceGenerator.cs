@@ -13,7 +13,7 @@ namespace UtilityTypeGenerator
 {
     using System;
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
     internal class UtilityTypeAttribute(string selector) : Attribute
     {
         public string Selector { get; } = selector;

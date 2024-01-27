@@ -29,7 +29,7 @@ internal static class UtilityTypeCSharpGenerator
         return syntax.NormalizeWhitespace().ToFullString().Replace("null !", "default!");
     }
 
-    private static SyntaxList<MemberDeclarationSyntax> Members(Compilation compilation, UtilityTypeSelector selector)
+    private static SyntaxList<MemberDeclarationSyntax> Members(Compilation compilation, SyntaxKind targetKind, UtilityTypeSelector selector)
     {
         SyntaxList<MemberDeclarationSyntax> list = [];
 
@@ -123,7 +123,7 @@ internal static class UtilityTypeCSharpGenerator
                 propertySyntax = propertySyntax.WithLeadingTrivia(leadingTrivias);
             }
 
-            if (!nullable && !propertyType.IsValueType && !isRequired)
+            if (targetKind != SyntaxKind.InterfaceDeclaration && !nullable && !propertyType.IsValueType && !isRequired)
             {
                 propertySyntax = propertySyntax.WithInitializer(
                     EqualsValueClause(PostfixUnaryExpression(
@@ -134,7 +134,7 @@ internal static class UtilityTypeCSharpGenerator
             }
 
 #if DEBUG
-            SyntaxTriviaList diagComment = TriviaList(Comment($"// nullable={nullable}, isValueType={propertyType.IsValueType}, isRequired={isRequired}"));
+            SyntaxTriviaList diagComment = TriviaList(Comment($"// targetKind={targetKind}, nullable={nullable}, isValueType={propertyType.IsValueType}, isRequired={isRequired}"));
             propertySyntax = propertySyntax.WithTrailingTrivia(diagComment);
 #endif
             list = list.Add(propertySyntax);
@@ -178,7 +178,7 @@ internal static class UtilityTypeCSharpGenerator
             syntax = syntax.WithOpenBraceToken(Token(SyntaxKind.OpenBraceToken));
         }
 
-        syntax = syntax.WithMembers(Members(compilation, selector));
+        syntax = syntax.WithMembers(Members(compilation, typeKind, selector));
 
         if (typeKind == SyntaxKind.RecordDeclaration)
         {

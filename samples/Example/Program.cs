@@ -67,6 +67,9 @@ namespace Public
     [UtilityType("Pick<Person, Name>")]
     public partial class OnlyName;
 
+    [UtilityType("Import<Person>")]
+    public partial interface IPerson;
+
     public class Person
     {
         public DateTimeOffset? BirthDate { get; set; }

@@ -37,8 +37,9 @@ namespace UtilityTypeGenerator
             .Append("// generated at ").AppendLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
             .AppendLine("#nullable enable")
             .AppendLine();
+        string header = sb.ToString();
 
-        string? baseName = null;
+        Dictionary<string, List<string>> sources = [];
         foreach ((TypeDeclarationSyntax typeSyntax, AttributeSyntax attribute) in receiver.Received)
         {
             string typeName = typeSyntax.Identifier.Text;
@@ -91,8 +92,16 @@ namespace UtilityTypeGenerator
                 // get the namespace for the class
                 string? @namespace = context.Compilation.GetSemanticModel(typeSyntax.SyntaxTree).GetDeclaredSymbol(typeSyntax)?.ContainingNamespace?.ToString();
 
-                sb = sb.AppendLine(UtilityTypeCSharpGenerator.Generate(context.Compilation, selector, typeSyntax.Kind(), typeName, @namespace));
-                baseName = Path.GetFileNameWithoutExtension(typeSyntax.SyntaxTree.FilePath);
+                string source = UtilityTypeCSharpGenerator.Generate(context.Compilation, selector, typeSyntax.Kind(), typeName, @namespace);
+                // get the file name containing the class to augment
+                string fileName = Path.GetFileNameWithoutExtension(typeSyntax.SyntaxTree.FilePath) + ".g.cs";
+                if (!sources.TryGetValue(fileName, out List<string> blocks))
+                {
+                    blocks = [];
+                    sources.Add(fileName, blocks);
+                }
+
+                blocks.Add(source);
             }
             catch (ArgumentException ex)
             {
@@ -116,11 +125,9 @@ namespace UtilityTypeGenerator
             }
         }
 
-        // if baseName was assigned, then we have at least one class to augment
-        if (baseName is not null)
+        foreach (KeyValuePair<string, List<string>> kv in sources)
         {
-            // get the file name containing the class to augment
-            context.AddSource($"{baseName}.g.cs", sb.ToString());
+            context.AddSource(kv.Key, header + string.Join("\n", kv.Value));
         }
     }
 

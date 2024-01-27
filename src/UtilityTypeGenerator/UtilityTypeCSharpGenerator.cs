@@ -53,6 +53,15 @@ internal static class UtilityTypeCSharpGenerator
                 case Accessibility.Internal:
                     tokens.Add(Token(SyntaxKind.InternalKeyword));
                     break;
+
+                case Accessibility.ProtectedAndInternal:
+                    tokens.Add(Token(SyntaxKind.ProtectedKeyword));
+                    tokens.Add(Token(SyntaxKind.InternalKeyword));
+                    break;
+
+                default:
+                    tokens.Add(Token(SyntaxKind.PublicKeyword));
+                    break;
             }
 
             if (isRequired)
@@ -84,6 +93,12 @@ internal static class UtilityTypeCSharpGenerator
 
         foreach ((ITypeSymbol containingType, string propertyName, ITypeSymbol propertyType, bool nullable, bool isReadonly, bool isRequired) in selector.GetPropertyRecords(compilation))
         {
+            if (propertyName.Contains('.'))
+            {
+                // skip properties that are not directly declared on the containing type
+                continue;
+            }
+
             // find the syntax tree for the property's declaring type, using the full type name in case of duplicate type names in different namespaces
             SyntaxTree containingTypeSyntax = compilation.SyntaxTrees
                 .Where(tree => tree.FilePath == containingType.Locations[0].SourceTree?.FilePath)
@@ -97,7 +112,7 @@ internal static class UtilityTypeCSharpGenerator
             PropertyDeclarationSyntax? sourcePropertySyntax = containingTypeSyntax?.GetRoot()
                 .DescendantNodes()
                 .OfType<PropertyDeclarationSyntax>()
-                .FirstOrDefault(property => property.Identifier.ValueText == propertyName);
+                .FirstOrDefault(property => property.Identifier.ValueText.Split('.')[^1] == propertyName.Split('.')[^1]);
 
             SyntaxTriviaList? leadingTrivias = null;
             if (sourcePropertySyntax is not null)
@@ -163,6 +178,7 @@ internal static class UtilityTypeCSharpGenerator
                 Accessibility.Public => (SyntaxToken[])[Token(SyntaxKind.PublicKeyword)],
                 Accessibility.Protected => [Token(SyntaxKind.ProtectedKeyword)],
                 Accessibility.Private => [Token(SyntaxKind.PrivateKeyword)],
+                Accessibility.Internal => [Token(SyntaxKind.InternalKeyword)],
                 Accessibility.ProtectedAndInternal => [Token(SyntaxKind.ProtectedKeyword), Token(SyntaxKind.InternalKeyword)],
                 _ => [Token(SyntaxKind.InternalKeyword)],
             },

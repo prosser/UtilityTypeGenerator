@@ -51,6 +51,9 @@ namespace Internal
 
     [UtilityType("Nullable<Union<Person, Position>>")]
     public partial record ChangeToARecordType;
+
+    [UtilityType("Import<Person>")]
+    internal partial interface IPerson2;
 }
 
 namespace Public

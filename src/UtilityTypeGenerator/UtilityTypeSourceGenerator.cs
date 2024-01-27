@@ -14,7 +14,7 @@ namespace UtilityTypeGenerator
     using System;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-    public class UtilityTypeAttribute(string selector) : Attribute
+    internal class UtilityTypeAttribute(string selector) : Attribute
     {
         public string Selector { get; } = selector;
     }

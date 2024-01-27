@@ -4,9 +4,9 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Microsoft.CodeAnalysis;
 
-internal static class UtilityTypeHelper
+internal static class UtilityTypeParser
 {
-    public static UtilityTypeSelector? Parse(string[] usingNamespaces, Compilation compilation, string input)
+    public static UtilityTypeSelector? Parse(string[] usingNamespaces, Accessibility accessibility, Compilation compilation, string input)
     {
         AntlrInputStream chars = new(input);
         UtilityTypesLexer lexer = new(chars);
@@ -17,7 +17,7 @@ internal static class UtilityTypeHelper
         };
 
         IParseTree tree = parser.selector() ?? throw new FormatException("Failed to parse selector");
-        UtilityTypesParserListener listener = new(usingNamespaces, compilation);
+        UtilityTypesParserListener listener = new(accessibility, usingNamespaces, compilation);
         ParseTreeWalker.Default.Walk(listener, tree);
 
         return listener.Selector;

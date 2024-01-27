@@ -23,10 +23,10 @@ public class UtilityTypeParserTests
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
         PropertyRecord[] notNullProperties = typeof(TestPocoOnlyNotNull).GetProperties()
-            .Select(p => new PropertyRecord(p.Name, Symbols[p.Name], false, p.GetAccessors(true).Length < 2, false)).ToArray();
+            .Select(p => new PropertyRecord(Symbols[nameof(TestPocoOnlyNotNull)], p.Name, Symbols[p.Name], false, p.GetAccessors(true).Length < 2, false)).ToArray();
 
         PropertyRecord[] nullableProperties = typeof(TestPocoOnlyNullable).GetProperties()
-            .Select(p => new PropertyRecord(p.Name, Symbols[p.Name], true, p.GetAccessors(true).Length < 2, false)).ToArray();
+            .Select(p => new PropertyRecord(Symbols[nameof(TestPocoOnlyNullable)], p.Name, Symbols[p.Name], true, p.GetAccessors(true).Length < 2, false)).ToArray();
 
         // can do intersect with either "Intersect" or "Intersection" keywords
         data.Add("intersect1", "Intersect<TestPocoOnlyNotNull, TestPoco>", notNullProperties);
@@ -42,12 +42,12 @@ public class UtilityTypeParserTests
         string[] omitAllBut1 = typeof(TestPoco).GetProperties().Where(x => x.Name != "NotNullInt").Select(x => x.Name).ToArray();
         data.Add("omit1", $"Omit<TestPoco, {string.Join('|', omitAllBut1)}>",
             [
-                new("NotNullInt", Symbols["NotNullInt"], false, false, false),
+                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
             ]);
 
         string[] omitAllBut2 = typeof(TestPoco).GetProperties().Where(x => x.Name is not "NotNullInt" and not "NotNullObject").Select(x => x.Name).ToArray();
         data.Add("omit2", $"Omit<Omit<TestPoco, {string.Join('|', omitAllBut1)}>, NotNullObject>",
-            [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
 
         return data;
     }
@@ -58,21 +58,21 @@ public class UtilityTypeParserTests
 
         data.Add("pick1", "Pick<TestPoco, NotNullInt | NotNullObject>",
             [
-                new("NotNullInt", Symbols["NotNullInt"], false, false, false),
-                new("NotNullObject", Symbols["NotNullObject"], false, false, false)
+                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
+                new(Symbols[nameof(TestPoco)], "NotNullObject", Symbols["NotNullObject"], false, false, false)
             ]);
 
         data.Add("pick1-dq", "Pick<TestPoco, \"NotNullInt\" | \"NotNullObject\">",
             [
-                new("NotNullInt", Symbols["NotNullInt"], false, false, false),
-                new("NotNullObject", Symbols["NotNullObject"], false, false, false)
+                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
+                new(Symbols[nameof(TestPoco)], "NotNullObject", Symbols["NotNullObject"], false, false, false)
             ]);
 
         data.Add("pick2", "Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
-            [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
 
         data.Add("pick2-no-whitespace", "Pick<Pick<TestPoco,NotNullInt|NotNullObject|NullableObject>,NotNullInt>",
-            [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
 
         //data.Add("pick2-leading-comment", "/* leading comment */ Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
         //    [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
@@ -137,7 +137,7 @@ public class UtilityTypeParserTests
     public void ParserCanParseGrammarSyntax(string name, string input, PropertyRecord[]? expected)
     {
         // Arrange
-        UtilityTypeSelector? selector = UtilityTypeHelper.Parse(["UtilityTypeGenerator.UnitTests"], Compilation.Value, input);
+        UtilityTypeSelector? selector = UtilityTypeParser.Parse(["UtilityTypeGenerator.UnitTests"], Accessibility.Public, Compilation.Value, input);
 
         if (expected is null)
         {
@@ -153,7 +153,7 @@ public class UtilityTypeParserTests
 
     private static PropertyRecord GetTestRecord(PropertyInfo p, Func<PropertyRecord, PropertyRecord>? configure = null)
     {
-        PropertyRecord pr = new(p.Name, Symbols[p.Name], p.Name.StartsWith("Nullable"), p.GetAccessors(true).Length < 2, false);
+        PropertyRecord pr = new(Symbols[p.DeclaringType!.FullName!], p.Name, Symbols[p.Name], p.Name.StartsWith("Nullable"), p.GetAccessors(true).Length < 2, false);
 
         return configure?.Invoke(pr) ?? pr;
     }

@@ -10,7 +10,8 @@ using Microsoft.CodeAnalysis;
 /// Composition constructor.
 /// </remarks>
 /// <param name="nestedSelector">Selector containing properties to make non-nullable.</param>
-public class NotNullSelector(SymbolOrSelector nestedSelector) : UtilityTypeSelector(nestedSelector)
+public class NotNullSelector(Accessibility accessibility, SymbolOrSelector nestedSelector)
+    : UtilityTypeSelector(accessibility, nestedSelector)
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {

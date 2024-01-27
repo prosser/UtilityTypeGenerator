@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using UtilityTypeGenerator.Selectors;
 using static UtilityTypeGenerator.UtilityTypesParser;
 
-internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation compilation) : UtilityTypesParserBaseListener
+internal class UtilityTypesParserListener(Accessibility accessibility, string[] usingNamespaces, Compilation compilation) : UtilityTypesParserBaseListener
 {
     public UtilityTypeSelector? Selector { get; private set; }
 
@@ -30,19 +30,13 @@ internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation 
 
     private UtilityTypeSelector? ParseSelector(SelectorContext context)
     {
-        if (context.has_props() is Has_propsContext props &&
-            props.has_props_verb()?.GetText() is string propsVerb)
-        {
-            return ParseSelectorWithTypeAndPropertiesArgs(usingNamespaces, compilation, props, propsVerb);
-        }
-
-        if (context.has_type() is Has_typeContext type &&
-            type.has_type_verb()?.GetText() is string typeVerb)
-        {
-            return ParseSelectorWithSingleTypeArg(usingNamespaces, compilation, type, typeVerb);
-        }
-
-        return context.has_types() is Has_typesContext types &&
+        return context.has_props() is Has_propsContext props &&
+            props.has_props_verb()?.GetText() is string propsVerb
+            ? ParseSelectorWithTypeAndPropertiesArgs(usingNamespaces, compilation, props, propsVerb)
+            : context.has_type() is Has_typeContext type &&
+            type.has_type_verb()?.GetText() is string typeVerb
+            ? ParseSelectorWithSingleTypeArg(usingNamespaces, compilation, type, typeVerb)
+            : context.has_types() is Has_typesContext types &&
             types.has_types_verb()?.GetText() is string typesVerb
             ? ParseSelectorWithMultipleTypeArgs(usingNamespaces, compilation, types, typesVerb)
             : throw new FormatException("Unknown verb");
@@ -61,9 +55,9 @@ internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation 
 
         return typesVerb switch
         {
-            "Intersect" => new IntersectionSelector(sos),
-            "Intersection" => new IntersectionSelector(sos),
-            "Union" => new UnionSelector(sos),
+            "Intersect" => new IntersectionSelector(accessibility, sos),
+            "Intersection" => new IntersectionSelector(accessibility, sos),
+            "Union" => new UnionSelector(accessibility, sos),
             _ => throw new FormatException($"Unknown verb: {typesVerb}")
         };
     }
@@ -79,12 +73,12 @@ internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation 
 
         return typeVerb switch
         {
-            "Import" => new ImportSelector(sos),
-            "NotNull" => new NotNullSelector(sos),
-            "Nullable" => new NullableSelector(sos),
-            "Optional" => new OptionalSelector(sos),
-            "Readonly" => new ReadonlySelector(sos),
-            "Required" => new RequiredSelector(sos),
+            "Import" => new ImportSelector(accessibility, sos),
+            "NotNull" => new NotNullSelector(accessibility, sos),
+            "Nullable" => new NullableSelector(accessibility, sos),
+            "Optional" => new OptionalSelector(accessibility, sos),
+            "Readonly" => new ReadonlySelector(accessibility, sos),
+            "Required" => new RequiredSelector(accessibility, sos),
             _ => throw new FormatException($"Unknown verb: {typeVerb}")
         };
     }
@@ -102,8 +96,8 @@ internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation 
 
         return propsVerb switch
         {
-            "Pick" => new PickSelector(sos, propertyNames),
-            "Omit" => new OmitSelector(sos, propertyNames),
+            "Pick" => new PickSelector(accessibility, sos, propertyNames),
+            "Omit" => new OmitSelector(accessibility, sos, propertyNames),
             _ => throw new FormatException($"Unknown verb: {propsVerb}")
         };
     }
@@ -131,6 +125,7 @@ internal class UtilityTypesParserListener(string[] usingNamespaces, Compilation 
         {
             string symbolText = symbolCtx.GetText();
             INamedTypeSymbol symbol = compilation.GetTypesByName(symbolText, usingNamespaces).FirstOrDefault()
+                ?? compilation.GetTypesByName(symbolText, []).FirstOrDefault()
                 ?? throw new TypeLoadException("Symbol not found");
             return new(symbol);
         }

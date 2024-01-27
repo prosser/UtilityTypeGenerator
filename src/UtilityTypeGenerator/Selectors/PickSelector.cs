@@ -11,7 +11,8 @@ using Microsoft.CodeAnalysis;
 /// </remarks>
 /// <param name="selector">Selector containing properties to pick from.</param>
 /// <param name="propertyNames">Property names to pick.</param>
-public class PickSelector(SymbolOrSelector selector, string[] propertyNames) : UtilityTypeSelector(selector)
+public class PickSelector(Accessibility accessibility, SymbolOrSelector selector, string[] propertyNames)
+    : UtilityTypeSelector(accessibility, selector)
 {
     private readonly HashSet<string> propertyNames = [.. propertyNames];
 
@@ -19,11 +20,8 @@ public class PickSelector(SymbolOrSelector selector, string[] propertyNames) : U
     {
         string[] missingPropertyNames = propertyNames.Except(properties.Select(x => x.Name)).ToArray();
 
-        if (missingPropertyNames.Length > 0)
-        {
-            throw new ArgumentException(string.Join(", ", missingPropertyNames));
-        }
-
-        return properties.Where(x => propertyNames.Contains(x.Name));
+        return missingPropertyNames.Length > 0
+            ? throw new ArgumentException(string.Join(", ", missingPropertyNames))
+            : properties.Where(x => propertyNames.Contains(x.Name));
     }
 }

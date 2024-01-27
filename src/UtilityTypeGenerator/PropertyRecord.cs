@@ -3,7 +3,7 @@
 using System;
 using Microsoft.CodeAnalysis;
 
-public sealed record PropertyRecord(string Name, ITypeSymbol Type, bool Nullable, bool Readonly, bool Required) : IEquatable<PropertyRecord>
+public sealed record PropertyRecord(ITypeSymbol ContainingType, string Name, ITypeSymbol Type, bool Nullable, bool Readonly, bool Required) : IEquatable<PropertyRecord>
 {
     //public static implicit operator PropertyRecord((string, ITypeSymbol, bool, bool, ) tuple)
     //{
@@ -12,12 +12,12 @@ public sealed record PropertyRecord(string Name, ITypeSymbol Type, bool Nullable
 
     public PropertyRecord MakeNotNull()
     {
-        return !Nullable ? this : new(Name, Type.MakeNotNull(), false, Readonly, Required);
+        return !Nullable ? this : new(ContainingType, Name, Type.MakeNotNull(), false, Readonly, Required);
     }
 
     public PropertyRecord MakeNullable(Compilation compilation)
     {
-        return Nullable ? this : new(Name, Type.MakeNullable(compilation), true, Readonly, Required);
+        return Nullable ? this : new(ContainingType, Name, Type.MakeNullable(compilation), true, Readonly, Required);
     }
 
     public bool Equals(PropertyRecord? other)

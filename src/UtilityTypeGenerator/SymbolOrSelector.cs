@@ -24,6 +24,8 @@ public record SymbolOrSelector
     public UtilityTypeSelector? Selector { get; }
     public INamedTypeSymbol? Symbol { get; }
 
+    public Accessibility Accessibility => Selector?.Accessibility ?? Symbol?.DeclaredAccessibility ?? throw new InvalidOperationException("SelectorOrSymbol has neither Selector nor Symbol.");
+
     public bool HasValue => Selector is not null || Symbol is not null;
 
     public PropertyRecord[] GetPropertyRecords(Compilation compilation)

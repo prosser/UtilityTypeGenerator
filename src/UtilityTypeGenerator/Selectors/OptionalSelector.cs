@@ -10,10 +10,11 @@ using Microsoft.CodeAnalysis;
 /// Composition constructor.
 /// </remarks>
 /// <param name="selector">Selector or type symbol containing properties to strip 'required' from.</param>
-public class OptionalSelector(SymbolOrSelector selector) : UtilityTypeSelector(selector)
+public class OptionalSelector(Accessibility accessibility, SymbolOrSelector selector)
+    : UtilityTypeSelector(accessibility, selector)
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {
-        return properties.Select(p => new PropertyRecord(p.Name, p.Type, p.Nullable, p.Readonly, false)).ToArray();
+        return properties.Select(p => new PropertyRecord(p.ContainingType, p.Name, p.Type, p.Nullable, p.Readonly, false)).ToArray();
     }
 }

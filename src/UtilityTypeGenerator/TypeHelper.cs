@@ -12,7 +12,7 @@ internal static class TypeHelper
             .Select(symbol =>
             {
                 bool isNullable = symbol.Type.IsNullable();
-                return new PropertyRecord(symbol.Name, symbol.Type, isNullable, symbol.IsReadOnly, symbol.IsRequired);
+                return new PropertyRecord(containingType, symbol.Name, symbol.Type, isNullable, symbol.IsReadOnly, symbol.IsRequired);
             })
             .ToArray();
     }

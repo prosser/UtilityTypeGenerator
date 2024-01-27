@@ -20,6 +20,15 @@ For more information about utility types and how to use them, check out [the Typ
 `
 1. Add the `[UtilityType("selector")]` attribute to a `partial` type, replacing `"selector"` with the selector(s) of your choice.
 
+## Notes on generated types
+
+- The generated type will be a `partial` type with the same name, type, and accessibility as the type with the `[UtilityType]` attribute.
+- Each property will have the same accessibility as the property in the input type.
+- Comments (leading trivia) from the first matching property in the input type will be copied to the generated property.
+- Initializer statements for properties will be stripped. If the property type is not nullable, the `= default!;` initializer will be added.
+
+If you need to customize the generated type, you can simply provide whatever you need in the partial type. Make sure to exclude any properties that you don't want to be generated if they would conflict!
+
 ## Supported selectors
 
 A selector is a string that specifies a verb (e.g., `Pick`), one or more types or nested selectors, and (for some verbs) property names.
@@ -41,15 +50,27 @@ A selector is a string that specifies a verb (e.g., `Pick`), one or more types o
 ### Import
 
 ```csharp
+namespace MyNamespace;
+
+using MyNamespace.InternalData;
+
 public class Person
 {
+    /// <summary>The unique identifier for the person.</summary>
     public Guid Id { get; set; }
+
+    /// <summary>The name of the person.</summary>
     public string? Name { get; set; }
+
+    /// <summary>The date of birth of the person.</summary>
     public DateTimeOffset? BirthDate { get; set; }
+
+    /// <summary>Internal data object for that person.</summary>
+    internal PersonData Data { get; set; }
 }
 
 [UtilityType("Import<Person>")]
-public partial class Foo
+internal partial class Foo
 {
     public required string SomeOtherProperty { get; }
 }
@@ -57,14 +78,19 @@ public partial class Foo
 
 ```csharp
 // generates:
-public partial class Foo
+internal partial class Foo
 {
+    /// <summary>The unique identifier for the person.</summary>
     public Guid Id { get; set; }
+    /// <summary>The name of the person.</summary>
     public string? Name { get; set; }
+    /// <summary>The date of birth of the person.</summary>
     public DateTimeOffset? BirthDate { get; set; }
+    /// <summary>Internal data object for that person.</summary>
+    internal global::MyNamespace.InternalData.PersonData Data { get; set; }
 }
 
-// since this is a partial class, SomeOtherProperty is also defined.
+// since this is a partial class, SomeOtherProperty is also defined (but not in the generated source).
 ```
 
 ### Pick

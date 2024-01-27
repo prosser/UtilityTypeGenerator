@@ -82,15 +82,46 @@ internal static class UtilityTypeCSharpGenerator
                     ]));
         }
 
-        foreach ((string propertyName, ITypeSymbol propertyType, bool nullable, bool isReadonly, bool isRequired) in selector.GetPropertyRecords(compilation))
+        foreach ((ITypeSymbol containingType, string propertyName, ITypeSymbol propertyType, bool nullable, bool isReadonly, bool isRequired) in selector.GetPropertyRecords(compilation))
         {
-            string propertyTypeName = propertyType.ToDisplayString();
+            // find the syntax tree for the property's declaring type, using the full type name in case of duplicate type names in different namespaces
+            SyntaxTree containingTypeSyntax = compilation.SyntaxTrees
+                .Where(tree => tree.FilePath == containingType.Locations[0].SourceTree?.FilePath)
+                .Select(tree => tree.GetRoot())
+                .OfType<CompilationUnitSyntax>()
+                .SelectMany(syntax => syntax.DescendantNodes().OfType<TypeDeclarationSyntax>())
+                .Where(type => type.Identifier.ValueText == containingType.Name)
+                .Select(type => type.SyntaxTree)
+                .FirstOrDefault();
+
+            PropertyDeclarationSyntax? sourcePropertySyntax = containingTypeSyntax?.GetRoot()
+                .DescendantNodes()
+                .OfType<PropertyDeclarationSyntax>()
+                .FirstOrDefault(property => property.Identifier.ValueText == propertyName);
+
+            SyntaxTriviaList? leadingTrivias = null;
+            if (sourcePropertySyntax is not null)
+            {
+                // get the leading trivia for the property
+                leadingTrivias = sourcePropertySyntax.GetLeadingTrivia();
+            }
+
+            string propertyTypeName = propertyType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            if (nullable && !propertyTypeName.EndsWith("?"))
+            {
+                propertyTypeName += "?";
+            }
 
             PropertyDeclarationSyntax propertySyntax = PropertyDeclaration(
                     ParseTypeName(propertyTypeName),
                     Identifier(propertyName))
                 .WithModifiers(GetPropertyModifiers(propertyType, isRequired))
                 .WithAccessorList(GetAccessors(isRequired));
+
+            if (leadingTrivias is not null)
+            {
+                propertySyntax = propertySyntax.WithLeadingTrivia(leadingTrivias);
+            }
 
             if (!nullable && !propertyType.IsValueType && !isRequired)
             {
@@ -102,6 +133,10 @@ internal static class UtilityTypeCSharpGenerator
                     .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
             }
 
+#if DEBUG
+            SyntaxTriviaList diagComment = TriviaList(Comment($"// nullable={nullable}, isValueType={propertyType.IsValueType}, isRequired={isRequired}"));
+            propertySyntax = propertySyntax.WithTrailingTrivia(diagComment);
+#endif
             list = list.Add(propertySyntax);
         }
 
@@ -122,9 +157,21 @@ internal static class UtilityTypeCSharpGenerator
             _ => throw new ArgumentException($"Invalid type kind: {typeKind}", nameof(typeKind))
         };
 
+        List<SyntaxToken> modifiers = [
+            .. selector.Accessibility switch
+            {
+                Accessibility.Public => (SyntaxToken[])[Token(SyntaxKind.PublicKeyword)],
+                Accessibility.Protected => [Token(SyntaxKind.ProtectedKeyword)],
+                Accessibility.Private => [Token(SyntaxKind.PrivateKeyword)],
+                Accessibility.ProtectedAndInternal => [Token(SyntaxKind.ProtectedKeyword), Token(SyntaxKind.InternalKeyword)],
+                _ => [Token(SyntaxKind.InternalKeyword)],
+            },
+            Token(SyntaxKind.PartialKeyword)
+        ];
+
         syntax = syntax
             .WithAttributeLists(TypeAttributes())
-            .WithModifiers(TokenList([Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.PartialKeyword)]));
+            .WithModifiers(TokenList(modifiers));
 
         if (typeKind == SyntaxKind.RecordDeclaration)
         {

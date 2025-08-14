@@ -39,9 +39,9 @@ A selector is a string that specifies a verb (e.g., `Pick`), one or more types o
 | `Intersection` | `Intersection<T1, T2 [, T3] [...]>` or `Intersect<T1, T2 [, T3] [...]>` | Creates a type with the intersection of properties from `T1` and `T2`, etc. (types or selectors). Duplicate properties are okay, but the type of the property must be the same in both types. |
 | `NotNull` | `NotNull<T>` | Creates a type with all properties from `T` (a type or selector) transformed to non-nullable.|
 | `Nullable` | `Nullable<T>` | Creates a type with all properties from `T` (a type or selector) transformed to nullable.|
-| `Omit` | `Omit<T, Property1 [| Property2] [...]>` or `Omit<T, Property1 [, Property2] [...]>` | Creates a type with all properties from `T` (a type or selector) except the specified properties. |
+| `Omit` | `Omit<T, Property1 [\| Property2] [...]>` or `Omit<T, Property1 [, Property2] [...]>` | Creates a type with all properties from `T` (a type or selector) except the specified properties. |
 | `Optional`* | `Optional<T>` | Creates a type with all properties from `T` (a type or selector) stripped of the `required` keyword. <br>\* `Optional<T>` behaves differently than it does in TypeScript! [See below for details](#Optional). |
-| `Pick` | `Pick<T, Property1 [| Property2] [...]>` or `Pick<T, Property1 [, Property2] [...]>` | Creates a type with only the specified properties from `T` (a type or selector). |
+| `Pick` | `Pick<T, Property1 [\| Property2] [...]>` or `Pick<T, Property1 [, Property2] [...]>` | Creates a type with only the specified properties from `T` (a type or selector). |
 | `Required` | `Required<T>` | Creates a type with all properties from `T` (a type or selector) marked as `required`.<br>Requires C# 11+ (or PolySharp!) |
 | `Union` | `Union<T1, T2 [, T3] [...]>` | Creates a type with the union of properties from `T1` and `T2`, etc. (types or selectors). Duplicate properties are okay, but the type of the property must be the same in both types. At least 2 types must be present in the selector. |
 

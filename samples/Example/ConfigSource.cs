@@ -1,9 +1,5 @@
 ﻿namespace Example;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using UtilityTypeGenerator;
 
 public class Configuration : IConfiguration
@@ -34,17 +30,14 @@ public interface IMyInterface;
 [UtilityType("Omit<SubConfiguration, Prop>")]
 public partial interface  ISubConfiguration
 {
-    public IMyInterface Prop { get; set; }
+    IMyInterface Prop { get; set; }
 }
 
 [UtilityType("Omit<Configuration, Sub | ToBeOmitted>")]
 public partial interface IConfiguration
 {
-    public ISubConfiguration Sub { get; set; }
+    ISubConfiguration Sub { get; set; }
 }
 
 [UtilityType("Import<IConfiguration>")]
-internal partial class InternalConfiguration : IConfiguration
-{
-
-}
+internal partial class InternalConfiguration : IConfiguration;

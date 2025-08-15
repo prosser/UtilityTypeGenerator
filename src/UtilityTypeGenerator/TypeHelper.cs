@@ -7,14 +7,13 @@ internal static class TypeHelper
 {
     public static PropertyRecord[] GetPropertyRecords(this ITypeSymbol containingType)
     {
-        return containingType.GetMembers()
+        return [.. containingType.GetMembers()
             .OfType<IPropertySymbol>()
             .Select(symbol =>
             {
                 bool isNullable = symbol.Type.IsNullable();
                 return new PropertyRecord(containingType, symbol.Name, symbol.Type, isNullable, symbol.IsReadOnly, symbol.IsRequired);
-            })
-            .ToArray();
+            })];
     }
 
     public static string? GetSimpleName(this Type type)
@@ -198,7 +197,7 @@ internal static class TypeHelper
     }
 
     public static T MakeNullable<T>(this T type, Compilation compilation)
-                                            where T : ITypeSymbol
+        where T : ITypeSymbol
     {
         return type.IsNullable()
             ? type

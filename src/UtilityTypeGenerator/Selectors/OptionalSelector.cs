@@ -15,6 +15,6 @@ public class OptionalSelector(Accessibility accessibility, SymbolOrSelector sele
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {
-        return properties.Select(p => new PropertyRecord(p.ContainingType, p.Name, p.Type, p.Nullable, p.Readonly, false)).ToArray();
+        return [.. properties.Select(p => new PropertyRecord(p.ContainingType, p.Name, p.Type, p.Nullable, p.Readonly, false))];
     }
 }

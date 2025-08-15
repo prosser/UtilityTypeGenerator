@@ -15,6 +15,6 @@ public class NullableSelector(Accessibility accessibility, SymbolOrSelector sele
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {
-        return properties.Select(p => p.MakeNullable(compilation)).ToArray();
+        return [.. properties.Select(p => p.MakeNullable(compilation))];
     }
 }

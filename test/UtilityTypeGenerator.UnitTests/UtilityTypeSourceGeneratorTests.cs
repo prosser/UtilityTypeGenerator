@@ -86,7 +86,7 @@ public class UtilityTypeSyntaxReceiverTests(ITestOutputHelper output)
     }
 
     private static CompilationUnitSyntax CreateUtilityTypePartialTypeForAugmentation(
-                    SyntaxKind typeKind,
+        SyntaxKind typeKind,
         string typeName,
         string typeNamespace,
         AttributeSyntax attribute,

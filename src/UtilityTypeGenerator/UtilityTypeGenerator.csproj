@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
 
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
@@ -17,8 +17,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconPath>$(MSBuildThisFileDirectory)../../icon.png</PackageIconPath>
-    <Version>0.0.9</Version>
-    <PackageVersion>0.0.9</PackageVersion>
+    <Version>1.0.0</Version>
+    <PackageVersion>1.0.0</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/prosser/UtilityTypeGenerator</PackageProjectUrl>
@@ -27,7 +27,7 @@
     <Copyright>Copyright (c) Peter Rosser. All rights reserved.</Copyright>
     <Authors>Peter Rosser</Authors>
     <Description>TypeScript-style Utility Types for C# using source generation.</Description>
-    <Deterinistic>true</Deterinistic>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -43,11 +43,11 @@
   <ItemGroup>
     <!-- none of the packages we need for source generation need to be imported into the consumer's project... -->
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.*" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.*" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.*" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
-    <PackageReference Include="PolySharp" Version="1.*" PrivateAssets="all">
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" PrivateAssets="all" GeneratePathProperty="true" Pack="true" />
+    <PackageReference Include="Polyfill" Version="8.7.4" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

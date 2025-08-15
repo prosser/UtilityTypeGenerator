@@ -17,7 +17,7 @@ public class OmitSelector(Accessibility accessibility, SymbolOrSelector selector
 
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {
-        string[] missingPropertyNames = propertyNames.Except(properties.Select(x => x.Name)).ToArray();
+        string[] missingPropertyNames = [.. propertyNames.Except(properties.Select(x => x.Name))];
 
         return missingPropertyNames.Length > 0
             ? throw new ArgumentException(string.Join(", ", missingPropertyNames))

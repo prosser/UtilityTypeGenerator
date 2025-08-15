@@ -22,11 +22,11 @@ public class UtilityTypeParserTests
     {
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
-        PropertyRecord[] notNullProperties = typeof(TestPocoOnlyNotNull).GetProperties()
-            .Select(p => new PropertyRecord(Symbols[nameof(TestPocoOnlyNotNull)], p.Name, Symbols[p.Name], false, p.GetAccessors(true).Length < 2, false)).ToArray();
+        string testPocoOnlyNotNullFullName = typeof(TestPocoOnlyNotNull).FullName!;
 
-        PropertyRecord[] nullableProperties = typeof(TestPocoOnlyNullable).GetProperties()
-            .Select(p => new PropertyRecord(Symbols[nameof(TestPocoOnlyNullable)], p.Name, Symbols[p.Name], true, p.GetAccessors(true).Length < 2, false)).ToArray();
+        PropertyRecord[] notNullProperties = [.. typeof(TestPocoOnlyNotNull).GetProperties().Select(p => new PropertyRecord(Symbols[testPocoOnlyNotNullFullName], p.Name, Symbols[p.Name], false, p.GetAccessors(true).Length < 2, false))];
+
+        PropertyRecord[] nullableProperties = [.. typeof(TestPocoOnlyNullable).GetProperties().Select(p => new PropertyRecord(Symbols[testPocoOnlyNotNullFullName], p.Name, Symbols[p.Name], true, p.GetAccessors(true).Length < 2, false))];
 
         // can do intersect with either "Intersect" or "Intersection" keywords
         data.Add("intersect1", "Intersect<TestPocoOnlyNotNull, TestPoco>", notNullProperties);
@@ -39,15 +39,21 @@ public class UtilityTypeParserTests
     {
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
-        string[] omitAllBut1 = typeof(TestPoco).GetProperties().Where(x => x.Name != "NotNullInt").Select(x => x.Name).ToArray();
+        string testPocoFullName = typeof(TestPoco).FullName!;
+
+        // test simple omit of all but one property
+        string[] omitAllBut1 = [.. typeof(TestPoco).GetProperties().Where(x => x.Name != nameof(TestPoco.NotNullInt)).Select(x => x.Name)];
         data.Add("omit1", $"Omit<TestPoco, {string.Join('|', omitAllBut1)}>",
             [
-                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false),
             ]);
 
-        string[] omitAllBut2 = typeof(TestPoco).GetProperties().Where(x => x.Name is not "NotNullInt" and not "NotNullObject").Select(x => x.Name).ToArray();
-        data.Add("omit2", $"Omit<Omit<TestPoco, {string.Join('|', omitAllBut1)}>, NotNullObject>",
-            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+        // test nested omit
+        string[] omitAllBut2 = [.. typeof(TestPoco).GetProperties().Where(x => x.Name is not nameof(TestPoco.NotNullInt) and not nameof(TestPoco.NotNullObject)).Select(x => x.Name)];
+        data.Add("omit2", $"Omit<Omit<TestPoco, {string.Join('|', omitAllBut2)}>, {nameof(TestPoco.NotNullObject)}>",
+            [
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false),
+            ]);
 
         return data;
     }
@@ -55,33 +61,34 @@ public class UtilityTypeParserTests
     public static TheoryData<string, string, PropertyRecord[]?> GetPickTestData()
     {
         TheoryData<string, string, PropertyRecord[]?> data = [];
+        string testPocoFullName = typeof(TestPoco).FullName!;
 
         data.Add("pick1", "Pick<TestPoco, NotNullInt | NotNullObject>",
             [
-                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
-                new(Symbols[nameof(TestPoco)], "NotNullObject", Symbols["NotNullObject"], false, false, false)
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false),
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullObject), Symbols[nameof(TestPoco.NotNullObject)], false, false, false)
             ]);
 
         data.Add("pick1-dq", "Pick<TestPoco, \"NotNullInt\" | \"NotNullObject\">",
             [
-                new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false),
-                new(Symbols[nameof(TestPoco)], "NotNullObject", Symbols["NotNullObject"], false, false, false)
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false),
+                new(Symbols[testPocoFullName], nameof(TestPoco.NotNullObject), Symbols[nameof(TestPoco.NotNullObject)], false, false, false)
             ]);
 
         data.Add("pick2", "Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
-            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+            [new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false)]);
 
         data.Add("pick2-no-whitespace", "Pick<Pick<TestPoco,NotNullInt|NotNullObject|NullableObject>,NotNullInt>",
-            [new(Symbols[nameof(TestPoco)], "NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+            [new(Symbols[testPocoFullName], nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false)]);
 
         //data.Add("pick2-leading-comment", "/* leading comment */ Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
-        //    [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+        //    [new(nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false)]);
 
         //data.Add("pick2-trailing-comment", "Pick<Pick<TestPoco, NotNullInt | NotNullObject | NullableObject>, NotNullInt> // trailing comment",
-        //    [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+        //    [new(nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false)]);
 
         //data.Add("pick2-inline-comment", "Pick<Pick<TestPoco, /* comment okay? */ NotNullInt | NotNullObject | NullableObject>, NotNullInt>",
-        //    [new("NotNullInt", Symbols["NotNullInt"], false, false, false)]);
+        //    [new(nameof(TestPoco.NotNullInt), Symbols[nameof(TestPoco.NotNullInt)], false, false, false)]);
 
         return data;
     }
@@ -91,8 +98,7 @@ public class UtilityTypeParserTests
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
         // depends on the fact that TestPoco is the union of TestPocoOnlyNotNull and TestPocoOnlyNullable already,
-        PropertyRecord[] testPocoProperties = typeof(TestPoco).GetProperties()
-            .Select(p => GetTestRecord(p, pr => pr with { Required = true })).ToArray();
+        PropertyRecord[] testPocoProperties = [.. typeof(TestPoco).GetProperties().Select(p => GetTestRecord(p, pr => pr with { Required = true }))];
 
         data.Add("Required", "Required<TestPoco>", testPocoProperties);
 
@@ -104,8 +110,7 @@ public class UtilityTypeParserTests
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
         // depends on the fact that TestPoco is the union of TestPocoOnlyNotNull and TestPocoOnlyNullable already,
-        PropertyRecord[] testPocoProperties = typeof(TestPoco).GetProperties()
-            .Select(p => GetTestRecord(p, pr => pr with { Required = false })).ToArray();
+        PropertyRecord[] testPocoProperties = [.. typeof(TestPoco).GetProperties().Select(p => GetTestRecord(p, pr => pr with { Required = false }))];
 
         data.Add("Optional", "Optional<TestPoco>", testPocoProperties);
 
@@ -117,8 +122,7 @@ public class UtilityTypeParserTests
         TheoryData<string, string, PropertyRecord[]?> data = [];
 
         // depends on the fact that TestPoco is the union of TestPocoOnlyNotNull and TestPocoOnlyNullable already,
-        PropertyRecord[] testPocoProperties = typeof(TestPoco).GetProperties()
-            .Select(p => GetTestRecord(p)).ToArray();
+        PropertyRecord[] testPocoProperties = [.. typeof(TestPoco).GetProperties().Select(p => GetTestRecord(p))];
 
         data.Add("union1", $"Union<{nameof(TestPocoOnlyNotNull)}, {nameof(TestPocoOnlyNullable)}>", testPocoProperties);
 
@@ -129,11 +133,11 @@ public class UtilityTypeParserTests
     }
 
     [Theory]
-    //[MemberData(nameof(GetPickTestData))]
-    //[MemberData(nameof(GetOmitTestData))]
+    [MemberData(nameof(GetPickTestData))]
+    [MemberData(nameof(GetOmitTestData))]
     [MemberData(nameof(GetUnionTestData))]
-    //[MemberData(nameof(GetIntersectionTestData))]
-    //[MemberData(nameof(GetRequiredTestData))]
+    [MemberData(nameof(GetIntersectionTestData))]
+    [MemberData(nameof(GetRequiredTestData))]
     public void ParserCanParseGrammarSyntax(string name, string input, PropertyRecord[]? expected)
     {
         // Arrange

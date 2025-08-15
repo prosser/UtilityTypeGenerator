@@ -7,23 +7,20 @@ public class IntersectionSelector(Accessibility accessibility, IEnumerable<Symbo
     : UtilityTypeSelector(accessibility, compiler =>
     {
         PropertyRecordComparer comparer = new();
-        return selectors
+        return [.. selectors
             .Select(s => s.GetPropertyRecords(compiler))
             .Cast<IEnumerable<PropertyRecord>>()
             .Aggregate((a, b) => a.Intersect(b, comparer))
-            .Distinct(comparer)
-            .ToArray();
+            .Distinct(comparer)];
     })
 {
     protected override IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation)
     {
-        IGrouping<string, PropertyRecord>[] conflicts = properties
+        IGrouping<string, PropertyRecord>[] conflicts = [.. properties
             .GroupBy(p => p.Name)
-            .Where(g => g.Count() > 1 && g.GroupBy(p => p.Type.ToDisplayString()).Count() > 1)
-            .ToArray();
+            .Where(g => g.Count() > 1 && g.GroupBy(p => p.Type.ToDisplayString()).Count() > 1)];
 
-        string[] conflictMessages = conflicts.Select(g => string.Join(", ", g.Select(p => $"{p.Type.ToDisplayString()} {p.Name}")))
-            .ToArray();
+        string[] conflictMessages = [.. conflicts.Select(g => string.Join(", ", g.Select(p => $"{p.Type.ToDisplayString()} {p.Name}")))];
 
         return conflicts.Length == 0
             ? properties

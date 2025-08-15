@@ -12,7 +12,7 @@ public abstract class UtilityTypeSelector(Accessibility accessibility, Func<Comp
     }
 
     protected UtilityTypeSelector(Accessibility accessibility, IEnumerable<SymbolOrSelector> selectorsOrSymbols, Func<IEnumerable<SymbolOrSelector>, Compilation, IEnumerable<PropertyRecord>> reducer)
-        : this(accessibility, compilation => reducer(selectorsOrSymbols, compilation).ToArray())
+        : this(accessibility, compilation => [.. reducer(selectorsOrSymbols, compilation)])
     {
     }
 
@@ -23,7 +23,7 @@ public abstract class UtilityTypeSelector(Accessibility accessibility, Func<Comp
     /// </summary>
     public PropertyRecord[] GetPropertyRecords(Compilation compilation)
     {
-        return Transform(getProperties(compilation), compilation).ToArray();
+        return [.. Transform(getProperties(compilation), compilation)];
     }
 
     protected abstract IEnumerable<PropertyRecord> Transform(IEnumerable<PropertyRecord> properties, Compilation compilation);

@@ -49,9 +49,7 @@ internal class UtilityTypesParserListener(Accessibility accessibility, string[] 
             throw new FormatException(types.exception.Message);
         }
 
-        SymbolOrSelector[] sos = types.symbol_or_selector()
-            .Select(ctx => ParseSymbolOrSelector(ctx, usingNamespaces, compilation))
-            .ToArray();
+        SymbolOrSelector[] sos = [.. types.symbol_or_selector().Select(ctx => ParseSymbolOrSelector(ctx, usingNamespaces, compilation))];
 
         return typesVerb switch
         {
@@ -92,7 +90,7 @@ internal class UtilityTypesParserListener(Accessibility accessibility, string[] 
 
         SymbolOrSelector sos = ParseSymbolOrSelector(props.symbol_or_selector(), usingNamespaces, compilation);
 
-        string[] propertyNames = props.property_name().Select(GetQuotedOrUnquotedIdText).ToArray();
+        string[] propertyNames = [.. props.property_name().Select(GetQuotedOrUnquotedIdText)];
 
         return propsVerb switch
         {

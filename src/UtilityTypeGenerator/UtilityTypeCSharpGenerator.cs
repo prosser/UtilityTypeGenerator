@@ -1,6 +1,7 @@
 ﻿namespace UtilityTypeGenerator;
 
 using System;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,6 +9,13 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 internal static class UtilityTypeCSharpGenerator
 {
+    // Cache the generator package version from the assembly. This is fixed at build time.
+    private static readonly string GeneratorVersion =
+        typeof(UtilityTypeCSharpGenerator).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+        ?? typeof(UtilityTypeCSharpGenerator).Assembly.GetName().Version?.ToString()
+        ?? "0.0.0";
+
     public static string Generate(Compilation compilation, UtilityTypeSelector selector, SyntaxKind typeKind, string name, string? @namespace)
     {
         // find the syntax tree for the type, using the full type name in case of duplicate type names in different namespaces
@@ -217,7 +225,7 @@ internal static class UtilityTypeCSharpGenerator
                                     {
                                         AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal("UtilityTypeGenerator"))),
                                         Token(SyntaxKind.CommaToken),
-                                        AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal("1.0.0")))
+                                        AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(GeneratorVersion)))
                                     }))))));
     }
 

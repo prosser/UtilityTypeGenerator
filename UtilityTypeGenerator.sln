@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		analysis.ruleset = analysis.ruleset
 		Directory.Build.props = Directory.Build.props
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityTypeGenerator.UnitTests", "test\UtilityTypeGenerator.UnitTests\UtilityTypeGenerator.UnitTests.csproj", "{E7E6E67E-42D2-44B5-9483-4F185AE3F775}"
